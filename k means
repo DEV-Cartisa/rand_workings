@@ -1,0 +1,80 @@
+
+
+
+
+
+# Looping through all the features by our y variable - see if there is relationship
+
+features = ['age', 'gender', 
+       'current_status', 'total_household_income',
+       'how_often_you_attend_entertaining_events_in_a_year', 'social_media',
+       'how_many_hours_are_you_willing_to_travel_to_attend_an_event',
+       'do_you_enjoy_adrenaline_rush_activities',
+       'are_food_areas_coffee_areas_bars_toilets_important_to_you',
+       'what_is_your_favourite_attraction_from_below','were_you_satisfied_with_the_last_event_you_attended_with_us',
+       'would_you_recommend_our_events_to_other_people',
+       'did_you_find_our_events_value_for_money']
+
+for f in features:
+    sns.countplot(x = f, data = SQL_Query, palette = 'Set3')# hue = 'Good Loan')
+    plt.xticks(rotation=45)
+    plt.show()
+
+
+
+
+# Creating a distance function - took this ready from the web
+
+ 
+def haversine_vectorize(lon1, lat1, lon2, lat2):
+ 
+    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
+ 
+    newlon = lon2 - lon1
+    newlat = lat2 - lat1
+ 
+    haver_formula = np.sin(newlat/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(newlon/2.0)**2
+ 
+    dist = 2 * np.arcsin(np.sqrt(haver_formula ))
+    km = 6367 * dist #6367 for distance in KM for miles use 3958
+    return km
+
+
+
+ Creating lat and long for our event - randoms
+
+SQL_Query['Event Lat'] = '51.5073'
+SQL_Query['Event Lon'] = '0.1657'
+
+
+haversine_vectorize(SQL_Query['Event Lon'].astype(float) ,SQL_Query['Event Lat'].astype(float),SQL_Query['longitude'].astype(float) ,
+                   SQL_Query['latitude'].astype(float))
+
+
+SQL_Query['Distance from Event'] = haversine_vectorize(SQL_Query['Event Lon'].astype(float) ,SQL_Query['Event Lat'].astype(float),SQL_Query['longitude'].astype(float) ,
+                   SQL_Query['latitude'].astype(float))
+
+
+
+
+# Making categorical variables into numeric representation
+
+print(SQL_Query.shape)
+
+# keeping the columns we need - Drop the location columns for now, as we do not want them to impact our results (for now)
+raw_data = SQL_Query[features]
+print(raw_data.shape)
+
+# Making categorical variables into numeric representation
+new_raw_data = pd.get_dummies(raw_data, columns = features)
+
+# Notes:
+# We can also do this with Label Encoding and OneHotEncoder from the preprocessing library
+
+print(new_raw_data.shape)
+# print the shape
+
+new_raw_data.head()
+
+
+
